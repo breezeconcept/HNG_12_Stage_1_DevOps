@@ -34,40 +34,79 @@ const getProperties = (num) => {
 };
 
 // API Endpoint
+// app.get("/api/classify-number", async (req, res) => {
+//   const { number } = req.query;
+
+//   if (!number || isNaN(number)) {
+//     return res.status(400).json({
+//       number,
+//       error: true,
+//     });
+//   }
+
+//   const num = parseInt(number, 10);
+//   const properties = getProperties(num);
+//   const digitSum = num.toString().split("").reduce((sum, digit) => sum + parseInt(digit), 0);
+
+//   try {
+//     // Fetch fun fact from Numbers API
+//     const funFactResponse = await axios.get(`http://numbersapi.com/${num}/math?json`);
+//     const funFact = funFactResponse.data.text;
+
+//     res.json({
+//       number: num,
+//       is_prime: isPrime(num),
+//       is_perfect: false, // Can be implemented later
+//       properties,
+//       digit_sum: digitSum,
+//       fun_fact: funFact,
+//     });
+//   } catch (error) {
+//     res.status(500).json({
+//       number: num,
+//       error: "Failed to fetch fun fact",
+//     });
+//   }
+// });
+
 app.get("/api/classify-number", async (req, res) => {
-  const { number } = req.query;
-
-  if (!number || isNaN(number)) {
-    return res.status(400).json({
-      number,
-      error: true,
-    });
-  }
-
-  const num = parseInt(number, 10);
-  const properties = getProperties(num);
-  const digitSum = num.toString().split("").reduce((sum, digit) => sum + parseInt(digit), 0);
-
-  try {
-    // Fetch fun fact from Numbers API
-    const funFactResponse = await axios.get(`http://numbersapi.com/${num}/math?json`);
-    const funFact = funFactResponse.data.text;
-
-    res.json({
-      number: num,
-      is_prime: isPrime(num),
-      is_perfect: false, // Can be implemented later
-      properties,
-      digit_sum: digitSum,
-      fun_fact: funFact,
-    });
-  } catch (error) {
-    res.status(500).json({
-      number: num,
-      error: "Failed to fetch fun fact",
-    });
-  }
+    const { number } = req.query;
+  
+    if (!number || isNaN(number)) {
+      return res.status(400).json({
+        number,
+        error: true,
+      });
+    }
+  
+    const num = parseInt(number, 10);
+    const properties = getProperties(num);
+    const digitSum = Math.abs(num) // Ensure negative numbers don't affect sum
+      .toString()
+      .split("")
+      .reduce((sum, digit) => sum + parseInt(digit, 10), 0);
+  
+    try {
+      // Fetch fun fact from Numbers API
+      const funFactResponse = await axios.get(`http://numbersapi.com/${num}/math?json`);
+      const funFact = funFactResponse.data.text;
+  
+      res.json({
+        number: num,
+        is_prime: isPrime(num),
+        is_perfect: false,
+        properties,
+        digit_sum: digitSum, // Fixed calculation
+        fun_fact: funFact,
+      });
+    } catch (error) {
+      res.status(500).json({
+        number: num,
+        error: "Failed to fetch fun fact",
+      });
+    }
 });
+  
 
 // Start Server
 app.listen(PORT, () => {
